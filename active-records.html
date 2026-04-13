@@ -1,0 +1,707 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Активні записи | HUMREY</title>
+  <meta name="description" content="Список активних записів на послуги HUMREY.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .records-page { padding: 120px 20px 40px; max-width: 1180px; margin: 0 auto; }
+    .records-header { margin-bottom: 30px; }
+    .records-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; background: rgba(255,255,255,0.04); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.22); }
+    .records-table th, .records-table td { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; color: rgba(255,255,255,0.92); }
+    .records-table th { background: rgba(255,255,255,0.08); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em; text-transform: uppercase; }
+    .records-table tr:last-child td { border-bottom: none; }
+    .record-user { display: flex; align-items: center; gap: 14px; }
+    .record-avatar { width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; color: #fff; flex-shrink: 0; }
+    .avatar-blue { background: #5f83ff; }
+    .avatar-green { background: #43c28d; }
+    .avatar-purple { background: #a677ff; }
+    .avatar-orange { background: #ff9f43; }
+    .avatar-cyan { background: #2dd4bf; }
+    .record-service { white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+    .record-phone { min-width: 130px; }
+    .record-actions { display: flex; gap: 10px; align-items: center; }
+    .record-action { border: 1px solid rgba(255,255,255,0.12); color: #fff; background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 14px; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+    .record-action:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .record-action.delete { color: #ff8b8b; border-color: rgba(255,139,139,0.35); }
+    .record-action.edit { color: #7be281; border-color: rgba(123,226,129,0.35); }
+    .record-status-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 100px; padding: 8px 12px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.01em; }
+    .record-status-paid { background: rgba(106,219,106,0.15); color: #6adb6a; }
+    .record-status-pending { background: rgba(245,195,61,0.15); color: #f5c33d; }
+    .record-status-cancelled { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+    .record-status-failed { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+    .record-status-other { background: rgba(148,163,184,0.15); color: #e2e8f0; }
+    .records-note { margin-top: 16px; color: rgba(255,255,255,0.72); }
+    .records-empty { margin-top: 30px; font-size: 1.05rem; background: rgba(255,255,255,0.03); padding: 24px; border-radius: 22px; text-align: center; }
+    .button-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+    .records-dashboard { display: grid; gap: 24px; margin-top: 28px; }
+    .records-sidebar { display: grid; gap: 18px; }
+    .records-main { display: grid; gap: 18px; }
+    .schedule-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .summary-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
+    .summary-card span { color: rgba(255,255,255,0.74); font-size: 0.92rem; }
+    .summary-card strong { font-size: 2rem; line-height: 1; }
+    .search-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 18px 20px; }
+    .search-box label { display: block; margin-bottom: 10px; color: rgba(255,255,255,0.68); font-size: 0.92rem; }
+    .search-input { width: 100%; padding: 16px 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: #fff; }
+    .search-input::placeholder { color: rgba(255,255,255,0.5); }
+    .date-filter { display: flex; flex-wrap: wrap; gap: 10px; padding: 16px; border-radius: 22px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .date-pill { min-width: 100px; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); color: #f8fafc; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease; text-align: center; }
+    .date-pill:hover { background: rgba(255,255,255,0.08); }
+    .date-pill.active { background: #22c55e; border-color: rgba(34,197,94,0.95); color: #0f172a; box-shadow: 0 16px 30px rgba(34,197,94,0.18); }
+    .records-main { display: grid; gap: 20px; }
+    .schedule-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 24px 24px 20px; border-radius: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+    .schedule-title { display: grid; gap: 8px; }
+    .schedule-title span { color: rgba(255,255,255,0.68); font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.14em; }
+    .schedule-title h2 { margin: 0; font-size: 1.5rem; }
+    .schedule-meta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+    .schedule-meta span { padding: 10px 16px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); font-size: 0.95rem; }
+    .schedule-board {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-auto-rows: minmax(140px, auto);
+      align-items: stretch;
+    }
+    .slot-card {
+      display: grid;
+      gap: 14px;
+      padding: 18px 18px 16px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.22);
+      min-height: 130px;
+    }
+    .slot-card.free {
+      background: rgba(34,197,94,0.06);
+      color: rgba(255,255,255,0.88);
+    }
+    .slot-card.booked {
+      background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(18,26,44,0.95));
+    }
+    .slot-card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .slot-time { font-size: 1rem; font-weight: 700; color: #22c55e; }
+    .slot-status { font-size: 0.88rem; color: rgba(255,255,255,0.78); }
+    .slot-multiple { display: grid; gap: 12px; }
+    .slot-item {
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      gap: 10px;
+    }
+    .slot-item .slot-card-header { gap: 10px; align-items: center; }
+    .slot-service { font-weight: 700; font-size: 0.95rem; }
+    .slot-card-details { display: grid; gap: 5px; color: rgba(255,255,255,0.78); font-size: 0.92rem; }
+    .slot-card-details span { display: block; }
+    .slot-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .slot-actions button { min-width: 110px; padding: 10px 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #fff; transition: background 0.2s ease, transform 0.2s ease; }
+    .slot-actions button:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .slot-empty { color: rgba(255,255,255,0.72); font-weight: 600; }
+    .status-pill { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 0.78rem; }
+    .status-pill.paid { background: rgba(106,219,106,0.18); color: #6adb6a; }
+    .status-pill.pending { background: rgba(245,195,61,0.18); color: #f5c33d; }
+    .status-pill.cancelled { background: rgba(255,107,107,0.18); color: #ff6b6b; }
+    .status-pill.other { background: rgba(148,163,184,0.18); color: #e2e8f0; }
+    .record-card { display: grid; grid-template-columns: minmax(108px, 120px) 1fr auto; gap: 18px; align-items: center; padding: 22px; border-radius: 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 80px rgba(0,0,0,0.18); }
+    .record-card-time { font-size: 1.3rem; font-weight: 700; color: #22c55e; }
+    .record-card-info { display: grid; gap: 10px; }
+    .record-card-service { font-weight: 700; font-size: 1.05rem; }
+    .record-card-details { display: grid; gap: 6px; color: rgba(255,255,255,0.7); font-size: 0.95rem; }
+    .record-card-details span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+    .record-card-actions { display: grid; gap: 10px; justify-content: end; }
+    .record-card-actions button { min-width: 120px; padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: #fff; transition: background 0.2s ease, transform 0.2s ease; }
+    .record-card-actions button:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+    .status-pill { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; font-weight: 700; font-size: 0.82rem; }
+    .status-pill.paid { background: rgba(106,219,106,0.18); color: #6adb6a; }
+    .status-pill.pending { background: rgba(245,195,61,0.18); color: #f5c33d; }
+    .status-pill.cancelled { background: rgba(255,107,107,0.18); color: #ff6b6b; }
+    .status-pill.other { background: rgba(148,163,184,0.18); color: #e2e8f0; }
+    @media (min-width: 1024px) { .records-dashboard { grid-template-columns: 320px minmax(0, 1fr); } }
+    @media (max-width: 900px) {
+      .schedule-header { grid-template-columns: 1fr; }
+      .record-card { grid-template-columns: 1fr; }
+      .record-card-actions { justify-content: stretch; }
+    }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal-card { width: min(560px, 100%); max-height: calc(100vh - 80px); display: flex; flex-direction: column; background: rgba(15,23,42,0.96); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 26px; box-shadow: 0 40px 150px rgba(0,0,0,0.55); color: #f8fafc; backdrop-filter: blur(16px); }
+    .modal-card h2 { margin: 0 0 8px; font-size: 1.5rem; letter-spacing: 0.01em; }
+    .modal-body { overflow-y: auto; padding-right: 8px; margin-bottom: 18px; max-height: calc(100vh - 220px); }
+    .modal-body::-webkit-scrollbar { width: 8px; }
+    .modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+    .modal-body::-webkit-scrollbar-track { background: transparent; }
+    .modal-row { display: grid; gap: 14px; margin-bottom: 20px; }
+    .modal-row label { display: block; font-size: 0.9rem; color: rgba(255,255,255,0.78); margin-bottom: 10px; }
+    .date-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; margin-top: 4px; }
+    .date-tabs::-webkit-scrollbar { height: 8px; }
+    .date-tabs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+    .date-tab { min-width: 110px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: #f8fafc; padding: 16px 14px; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease; text-align: center; flex-shrink: 0; white-space: nowrap; }
+    .date-tab:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.24); }
+    .date-tab.active { background: #22c55e; border-color: rgba(34,197,94,0.95); color: #0f172a; box-shadow: 0 16px 30px rgba(34,197,94,0.18); }
+    .date-tab span { display: block; font-size: 0.78rem; color: rgba(255,255,255,0.72); margin-bottom: 6px; }
+    .date-tab strong { display: block; font-size: 1.05rem; }
+    .time-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+    .time-button { border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #f8fafc; padding: 14px 0; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease; font-weight: 600; }
+    .time-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.22); }
+    .time-button.active { background: #22c55e; border-color: rgba(34,197,94,0.95); color: #0f172a; box-shadow: 0 14px 28px rgba(34,197,94,0.18); }
+    .modal-row select,
+    .modal-row input { width: 100%; padding: 16px 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); color: #fff; font-size: 1rem; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+    .modal-row select:focus,
+    .modal-row input:focus { border-color: rgba(123,226,129,0.8); box-shadow: 0 0 0 4px rgba(123,226,129,0.08); }
+    .modal-row select { display: none; }
+    .modal-summary { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; color: rgba(255,255,255,0.88); font-size: 0.95rem; }
+    .modal-summary span { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); padding: 10px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; align-items: center; position: sticky; bottom: 0; background: rgba(15,23,42,0.98); padding: 18px 0 0; margin-top: auto; }
+    .modal-actions button { min-width: 140px; padding: 14px 24px; border-radius: 18px; border: none; cursor: pointer; font-weight: 700; font-size: 0.98rem; }
+    .modal-actions .cancel { background: rgba(255,255,255,0.08); color: #f8fafc; }
+    .modal-actions .save { background: #22c55e; color: #0f172a; box-shadow: 0 20px 50px rgba(34,197,94,0.22); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html#home">HUMREY</a>
+    <nav class="nav">
+      <a href="index.html#about">Про салон</a>
+      <a href="index.html#services">Послуги</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="index.html">Повернутись</a>
+  </header>
+
+  <main class="records-page">
+    <section class="records-header">
+      <span>Адмін-панель</span>
+      <h1>Активні записи</h1>
+      <p class="records-note">Тут відображаються всі бронювання, які були оформлені через сайт.</p>
+      <div class="button-row">
+        <a class="button button-primary" href="index.html">На головну</a>
+        <button type="button" class="button button-secondary" id="refreshRecords">Оновити</button>
+      </div>
+      <div class="records-dashboard">
+        <div class="records-sidebar">
+          <div class="schedule-summary" id="scheduleSummary">
+            <div class="summary-card">
+              <span>Усі записи</span>
+              <strong id="allRecordsCount">0</strong>
+            </div>
+            <div class="summary-card">
+              <span>Сьогодні</span>
+              <strong id="todayRecordsCount">0</strong>
+            </div>
+            <div class="summary-card">
+              <span>Вільних дат</span>
+              <strong id="availableDatesCount">14</strong>
+            </div>
+          </div>
+          <div class="search-box">
+            <label for="searchRecords">Пошук</label>
+            <input type="search" id="searchRecords" class="search-input" placeholder="Пошук по клієнту, службі, даті">
+          </div>
+          <div class="date-filter" id="dateFilterTabs" role="tablist"></div>
+        </div>
+        <div class="records-main">
+          <div class="schedule-header">
+            <div class="schedule-title">
+              <span>Розклад</span>
+              <h2 id="selectedDateLabel">іавантаження...</h2>
+            </div>
+            <div class="schedule-meta">
+              <span id="selectedDateCount">0 записів</span>
+              <span id="selectedStatusOverview">Усі записи</span>
+            </div>
+          </div>
+          <div id="recordsMessage" class="auth-message"></div>
+          <div id="recordsContainer" class="schedule-board"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="rescheduleModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Перенести бронювання</h2>
+      <p style="margin:0 0 18px; color: rgba(255,255,255,0.72);">Виберіть нову дату й час у комфортному вікні.</p>
+      <form id="rescheduleForm" class="modal-body">
+        <input type="hidden" id="rescheduleDateValue" name="date">
+        <input type="hidden" id="rescheduleTimeValue" name="time">
+        <div class="modal-row">
+          <label>Нова дата</label>
+          <div class="date-tabs" id="dateTabs" role="tablist"></div>
+        </div>
+        <div class="modal-row">
+          <label>Новий час</label>
+          <div class="time-grid" id="timeGrid"></div>
+        </div>
+        <div class="modal-summary">
+          <span id="selectedDateText">Обрана дата: -</span>
+          <span id="selectedTimeText">Обраний час: -</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="cancel" id="cancelReschedule">Відмінити</button>
+          <button type="submit" class="save">Зберегти</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const recordsContainer = document.getElementById('recordsContainer');
+    const recordsMessage = document.getElementById('recordsMessage');
+    const refreshButton = document.getElementById('refreshRecords');
+    const dateFilterTabs = document.getElementById('dateFilterTabs');
+    const searchInput = document.getElementById('searchRecords');
+    const allRecordsCountNode = document.getElementById('allRecordsCount');
+    const todayRecordsCountNode = document.getElementById('todayRecordsCount');
+    const availableDatesCountNode = document.getElementById('availableDatesCount');
+    const selectedDateLabel = document.getElementById('selectedDateLabel');
+    const selectedDateCountNode = document.getElementById('selectedDateCount');
+    const selectedStatusOverview = document.getElementById('selectedStatusOverview');
+
+    let allRecords = [];
+    let activeDateFilter = null;
+    let searchQuery = '';
+    const timeSlots = Array.from({ length: 26 }, (_, index) => {
+      const hour = 8 + Math.floor(index / 2);
+      const minute = index % 2 === 0 ? '00' : '30';
+      return `${String(hour).padStart(2, '0')}:${minute}`;
+    });
+
+    const getCurrentUser = () => {
+      try {
+        return JSON.parse(localStorage.getItem('humrey-user') || 'null');
+      } catch {
+        return null;
+      }
+    };
+
+    const showRecordsMessage = (text, type = 'error') => {
+      if (!recordsMessage) return;
+      recordsMessage.textContent = text;
+      recordsMessage.className = `auth-message ${type === 'success' ? 'success' : type === 'error' ? 'error' : ''}`;
+    };
+
+    const parseDateFromYMD = dateStr => {
+      if (!dateStr) return null;
+      const [year, month, day] = String(dateStr).split('-').map(Number);
+      if (!year || !month || !day) return null;
+      return new Date(year, month - 1, day);
+    };
+
+    const formatYMD = date => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const formatDisplayDate = dateStr => {
+      const date = parseDateFromYMD(dateStr);
+      if (!date) return 'Не вказано';
+      const weekday = date.toLocaleDateString('uk-UA', { weekday: 'long' });
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      return `${weekday}, ${day}.${month}`;
+    };
+
+    const getFilteredRecords = () => {
+      return allRecords.filter(record => {
+        const matchesDate = !activeDateFilter || record.date === activeDateFilter;
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return matchesDate;
+        return matchesDate && [record.name, record.service, record.phone, record.date, record.time, record.amount].some(value => String(value || '').toLowerCase().includes(query));
+      });
+    };
+
+    const updateDashboardSummary = records => {
+      const today = formatYMD(new Date());
+      const todayCount = records.filter(r => r.date === today).length;
+      const bookedDates = new Set(records.filter(r => r.date).map(r => r.date));
+      const freeDates = Math.max(0, 14 - bookedDates.size);
+      allRecordsCountNode.textContent = records.length;
+      todayRecordsCountNode.textContent = todayCount;
+      availableDatesCountNode.textContent = `${freeDates}`;
+    };
+
+    const statusMap = {
+      paid: { text: 'Оплачено', cls: 'paid' },
+      pending: { text: 'У процесі', cls: 'pending' },
+      cancelled: { text: 'Скасовано', cls: 'cancelled' },
+      failed: { text: 'Не пройшло', cls: 'cancelled' }
+    };
+
+    const renderRecords = () => {
+      const filtered = getFilteredRecords();
+      updateDashboardSummary(allRecords);
+      const total = filtered.length;
+      selectedDateLabel.textContent = activeDateFilter ? formatDisplayDate(activeDateFilter) : 'Усі записи';
+      selectedDateCountNode.textContent = `${total} запис${total === 1 ? '' : 'ів'}`;
+      selectedStatusOverview.textContent = searchQuery ? `Пошук: «${searchQuery}»` : 'Відображено за датою';
+
+      if (!activeDateFilter) {
+        recordsContainer.innerHTML = '<p class="records-empty">Оберіть дату на панелі зліва.</p>';
+        return;
+      }
+
+      const dayRecords = filtered.filter(record => record.date === activeDateFilter);
+      const recordsByTime = dayRecords.reduce((map, record) => {
+        const time = record.time || '00:00';
+        if (!map.has(time)) map.set(time, []);
+        map.get(time).push(record);
+        return map;
+      }, new Map());
+
+      recordsContainer.innerHTML = timeSlots.map(time => {
+        const slotRecords = recordsByTime.get(time) || [];
+        if (!slotRecords.length) {
+          return `
+            <article class="slot-card free">
+              <div class="slot-card-top">
+                <div class="slot-time">${time}</div>
+                <span class="slot-empty">Вільно</span>
+              </div>
+            </article>
+          `;
+        }
+
+        return `
+          <article class="slot-card booked">
+            <div class="slot-card-top">
+              <div class="slot-time">${time}</div>
+              <span class="slot-status">${slotRecords.length} запис${slotRecords.length === 1 ? '' : 'ів'}</span>
+            </div>
+            <div class="slot-multiple">
+              ${slotRecords.map(record => {
+                const status = statusMap[record.status] || { text: 'Нове', cls: 'other' };
+                return `
+                  <div class="slot-item" data-booking-id="${record.id}">
+                    <div class="slot-card-header">
+                      <span class="slot-service">${record.service || 'Послуга'}</span>
+                      <span class="status-pill ${status.cls}">${status.text}</span>
+                    </div>
+                    <div class="slot-card-details">
+                      <span><strong>${record.name || 'Гість'}</strong></span>
+                      <span>${record.phone || 'Телефон не вказано'}</span>
+                      <span>Оплата: ${record.payment === 'card' ? 'Картка' : 'Готівка'}</span>
+                      <span>Сума: ${record.amount || '-'}</span>
+                    </div>
+                    <div class="slot-actions">
+                      <button class="record-action edit" data-action="edit" data-id="${record.id}" data-date="${record.date || ''}" data-time="${record.time || ''}">Перенести</button>
+                      <button class="record-action delete" data-action="delete" data-id="${record.id}">Видалити</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </article>
+        `;
+      }).join('');
+    };
+
+    const buildDateFilterTabs = () => {
+      const base = new Date();
+      dateFilterTabs.innerHTML = '';
+
+      for (let i = 0; i < 14; i += 1) {
+        const date = new Date(base);
+        date.setDate(base.getDate() + i);
+        const value = formatYMD(date);
+        const weekday = date.toLocaleDateString('uk-UA', { weekday: 'short' });
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'date-pill';
+        pill.dataset.value = value;
+        pill.innerHTML = `<strong>${day}.${month}</strong><span>${weekday}</span>`;
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.date-pill').forEach(tab => tab.classList.remove('active'));
+          pill.classList.add('active');
+          activeDateFilter = value;
+          renderRecords(allRecords);
+        });
+        dateFilterTabs.appendChild(pill);
+      }
+
+      const defaultButton = dateFilterTabs.querySelector('.date-pill');
+      if (defaultButton) {
+        defaultButton.classList.add('active');
+        activeDateFilter = defaultButton.dataset.value;
+      }
+    };
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value || '';
+        renderRecords(allRecords);
+      });
+    }
+
+    const loadRecords = async () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser || !currentUser.username) {
+        showRecordsMessage('Ви не авторизовані. Увійдіться, щоб переглянути записи.', 'error');
+        recordsContainer.innerHTML = '';
+        return;
+      }
+
+      try {
+        const response = await fetchApi(`/bookings?adminUsername=${encodeURIComponent(currentUser.username)}`);
+        const result = await response.json();
+        if (!response.ok) {
+          showRecordsMessage(result.error || 'Не вдалося завантажити записи.', 'error');
+          recordsContainer.innerHTML = '';
+          return;
+        }
+
+        showRecordsMessage('Записи завантажено.', 'success');
+        allRecords = result.bookings || [];
+        buildDateFilterTabs();
+        renderRecords(allRecords);
+      } catch (error) {
+        showRecordsMessage('Помилка зʼєднання із сервером.', 'error');
+        recordsContainer.innerHTML = '';
+      }
+    };
+
+    const apiBases = location.protocol === 'file:'
+      ? ['http://localhost:3000/api', 'http://localhost:3001/api']
+      : [`${location.origin}/api`];
+
+    const fetchApi = async (path, options = {}) => {
+      let lastError = null;
+      for (const base of apiBases) {
+        try {
+          const response = await fetch(`${base}${path}`, options);
+          if (response.ok || response.status !== 0) {
+            return response;
+          }
+          lastError = new Error(`Server returned status ${response.status}`);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error('Network error');
+    };
+
+    const deleteBooking = async (bookingId) => {
+      const currentUser = getCurrentUser();
+      if (!currentUser?.username) {
+        showRecordsMessage('Ви не авторизовані.', 'error');
+        return;
+      }
+      try {
+        const response = await fetchApi(`/bookings/${encodeURIComponent(bookingId)}?adminUsername=${encodeURIComponent(currentUser.username)}`, {
+          method: 'DELETE'
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          showRecordsMessage(result.error || 'Не вдалося видалити бронювання.', 'error');
+          return;
+        }
+        showRecordsMessage('Бронювання видалено.', 'success');
+        loadRecords();
+      } catch (error) {
+        showRecordsMessage('Помилка зʼєднання із сервером.', 'error');
+      }
+    };
+
+    const rescheduleBooking = async (bookingId, date, time) => {
+      const currentUser = getCurrentUser();
+      if (!currentUser?.username) {
+        showRecordsMessage('Ви не авторизовані.', 'error');
+        return;
+      }
+      try {
+        const response = await fetchApi(`/bookings/${encodeURIComponent(bookingId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date, time, adminUsername: currentUser.username })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          showRecordsMessage(result.error || 'Не вдалося перенести бронювання.', 'error');
+          return;
+        }
+        showRecordsMessage('Бронювання перенесено.', 'success');
+        closeRescheduleModal();
+        loadRecords();
+      } catch (error) {
+        showRecordsMessage('Помилка зʼєднання із сервером.', 'error');
+      }
+    };
+
+    const rescheduleModal = document.getElementById('rescheduleModal');
+    const rescheduleForm = document.getElementById('rescheduleForm');
+    const rescheduleDateValue = document.getElementById('rescheduleDateValue');
+    const rescheduleTimeValue = document.getElementById('rescheduleTimeValue');
+    const dateTabs = document.getElementById('dateTabs');
+    const timeGrid = document.getElementById('timeGrid');
+    const cancelReschedule = document.getElementById('cancelReschedule');
+    let activeRescheduleId = null;
+    let selectedDateValue = null;
+    let selectedTimeValue = null;
+
+    const formatDateOption = date => {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const weekday = date.toLocaleDateString('uk-UA', { weekday: 'short' });
+      return `${weekday}, ${day}.${month}`;
+    };
+
+
+    const buildDateTabs = (selectedDate) => {
+      dateTabs.innerHTML = '';
+      const start = selectedDate ? parseDateFromYMD(selectedDate) : new Date();
+      const base = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      for (let i = 0; i < 14; i += 1) {
+        const optionDate = new Date(base);
+        optionDate.setDate(base.getDate() + i);
+        const value = `${optionDate.getFullYear()}-${String(optionDate.getMonth() + 1).padStart(2, '0')}-${String(optionDate.getDate()).padStart(2, '0')}`;
+        const day = String(optionDate.getDate()).padStart(2, '0');
+        const month = String(optionDate.getMonth() + 1).padStart(2, '0');
+        const weekday = optionDate.toLocaleDateString('uk-UA', { weekday: 'short' });
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'date-tab';
+        button.dataset.value = value;
+        button.innerHTML = `<span>${weekday}</span><strong>${day}.${month}</strong>`;
+        if (value === selectedDateValue) {
+          button.classList.add('active');
+        }
+        button.addEventListener('click', () => {
+          selectedDateValue = value;
+          rescheduleDateValue.value = value;
+          document.querySelectorAll('.date-tab').forEach(tab => tab.classList.remove('active'));
+          button.classList.add('active');
+          updateSelectedSummary();
+        });
+        dateTabs.appendChild(button);
+      }
+
+      if (!selectedDateValue) {
+        selectedDateValue = dateTabs.firstElementChild?.dataset.value || null;
+      }
+      if (selectedDateValue) {
+        dateTabs.querySelector(`.date-tab[data-value="${selectedDateValue}"]`)?.classList.add('active');
+        rescheduleDateValue.value = selectedDateValue;
+      }
+    };
+
+    const buildTimeGrid = (selectedTime) => {
+      timeGrid.innerHTML = '';
+      const minutesStep = 30;
+      for (let hour = 8; hour <= 20; hour += 1) {
+        for (let m = 0; m < 60; m += minutesStep) {
+          const value = `${String(hour).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'time-button';
+          button.dataset.value = value;
+          button.textContent = value;
+          if (value === selectedTime) {
+            selectedTimeValue = value;
+            button.classList.add('active');
+          }
+          button.addEventListener('click', () => {
+            selectedTimeValue = value;
+            rescheduleTimeValue.value = value;
+            document.querySelectorAll('.time-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            updateSelectedSummary();
+          });
+          timeGrid.appendChild(button);
+        }
+      }
+
+      if (!selectedTimeValue) {
+        const firstTimeButton = timeGrid.firstElementChild;
+        selectedTimeValue = firstTimeButton?.dataset.value || null;
+      }
+      if (selectedTimeValue) {
+        timeGrid.querySelector(`.time-button[data-value="${selectedTimeValue}"]`)?.classList.add('active');
+        rescheduleTimeValue.value = selectedTimeValue;
+      }
+      updateSelectedSummary();
+    };
+
+    const updateSelectedSummary = () => {
+      document.getElementById('selectedDateText').textContent = `Обрана дата: ${selectedDateValue || '-'}`;
+      document.getElementById('selectedTimeText').textContent = `Обраний час: ${selectedTimeValue || '-'}`;
+    };
+
+    const openRescheduleModal = (bookingId, date, time) => {
+      activeRescheduleId = bookingId;
+      selectedDateValue = date || null;
+      selectedTimeValue = time || null;
+      buildDateTabs(date);
+      buildTimeGrid(time);
+      rescheduleModal.classList.add('open');
+      rescheduleModal.setAttribute('aria-hidden', 'false');
+      dateTabs.querySelector('.date-tab')?.focus();
+    };
+
+    const closeRescheduleModal = () => {
+      activeRescheduleId = null;
+      selectedDateValue = null;
+      selectedTimeValue = null;
+      rescheduleDateValue.value = '';
+      rescheduleTimeValue.value = '';
+      rescheduleModal.classList.remove('open');
+      rescheduleModal.setAttribute('aria-hidden', 'true');
+    };
+
+    rescheduleForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!activeRescheduleId) return;
+      const date = rescheduleDateValue.value || selectedDateValue;
+      const time = rescheduleTimeValue.value || selectedTimeValue;
+      if (!date || !time) return;
+      rescheduleBooking(activeRescheduleId, date, time);
+    });
+
+    cancelReschedule.addEventListener('click', closeRescheduleModal);
+    rescheduleModal.addEventListener('click', event => {
+      if (event.target === rescheduleModal) {
+        closeRescheduleModal();
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && rescheduleModal.classList.contains('open')) {
+        closeRescheduleModal();
+      }
+    });
+
+    recordsContainer.addEventListener('click', event => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const action = button.dataset.action;
+      const bookingId = button.dataset.id;
+      if (action === 'delete') {
+        if (confirm('Ви дійсно хочете видалити це бронювання?')) {
+          deleteBooking(bookingId);
+        }
+      }
+      if (action === 'edit') {
+        const currentDate = button.dataset.date || '';
+        const currentTime = button.dataset.time || '';
+        openRescheduleModal(bookingId, currentDate, currentTime);
+      }
+    });
+
+    refreshButton.addEventListener('click', loadRecords);
+    loadRecords();
+  </script>
+</body>
+</html>
+
+
+

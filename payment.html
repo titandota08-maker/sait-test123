@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оплата | HUMREY</title>
+  <meta name="description" content="Оплата карткою через украінські банки для HUMREY.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html#home">HUMREY</a>
+    <nav class="nav">
+      <a href="index.html#about">Про салон</a>
+      <a href="index.html#services">Послуги</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="booking.html">Повернутись</a>
+  </header>
+
+  <main class="payment-page">
+    <div class="payment-card" id="paymentCard">
+      <div class="payment-header">
+        <span>Оплата</span>
+        <h2>Підтвердіть оплату картою</h2>
+      </div>
+      <div id="paymentContent"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>HUMREY - чоловічий манікюр і педикюр</span>
+    <span>© 2026</span>
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const paymentContent = document.getElementById('paymentContent');
+    const pending = JSON.parse(localStorage.getItem('humreyPendingBooking') || 'null');
+    const paymentInProgressKey = 'humreyPaymentInProgress';
+    const banks = ['Monobank', 'PrivatBank', 'Oschadbank', 'Alfa-Bank', 'UKRSIB'];
+    const bankLinks = {
+      Monobank: 'https://www.monobank.ua/',
+      PrivatBank: 'https://next.privat24.ua/',
+      Oschadbank: 'https://www.oschadbank.ua/',
+      'Alfa-Bank': 'https://alfabank.ua/',
+      UKRSIB: 'https://www.ukrsibbank.com/'
+    };
+
+    const formatValue = value => value ? value : 'Не вказано';
+
+    const renderBankList = () => {
+      paymentContent.innerHTML = '';
+      const description = document.createElement('p');
+      description.className = 'payment-instructions';
+      description.textContent = 'Оберіть банк, щоб перейти до підтвердження оплати в додатку вашого банку.';
+      paymentContent.appendChild(description);
+
+      const grid = document.createElement('div');
+      grid.className = 'payment-grid';
+      banks.forEach(bank => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'bank-card';
+        card.innerHTML = `<span>${bank}</span><strong>Оплатити</strong>`;
+        card.addEventListener('click', () => {
+          if (pending) {
+            localStorage.setItem('humreyPendingBooking', JSON.stringify(pending));
+          }
+          params.set('bank', bank);
+          window.location.search = params.toString();
+        });
+        grid.appendChild(card);
+      });
+      paymentContent.appendChild(grid);
+    };
+
+    const renderPaymentDetails = bank => {
+      const data = pending || Object.fromEntries(params.entries());
+      paymentContent.innerHTML = '';
+      const description = document.createElement('p');
+      description.className = 'payment-instructions';
+      description.textContent = `Ви обрали оплату карткою через ${bank}. Натисніть «Оплатити», щоб ввести реквізити для підтвердження.`;
+      paymentContent.appendChild(description);
+
+      const summary = document.createElement('div');
+      summary.className = 'payment-summary';
+      summary.innerHTML = `
+        <p><strong>Ім'я:</strong> ${formatValue(data.name)}</p>
+        <p><strong>Послуга:</strong> ${formatValue(data.service)}</p>
+        <p><strong>Дата:</strong> ${formatValue(data.date)}</p>
+        <p><strong>Час:</strong> ${formatValue(data.time)}</p>
+        <p><strong>Спосіб:</strong> Карткою через ${bank}</p>
+      `;
+      paymentContent.appendChild(summary);
+
+      const note = document.createElement('p');
+      note.className = 'payment-note';
+      note.innerHTML = 'Номер картки для оплати: <strong>4441 1110 3400 0749</strong>.';
+      paymentContent.appendChild(note);
+
+      const actions = document.createElement('div');
+      actions.className = 'payment-actions';
+
+      const payButton = document.createElement('button');
+      payButton.className = 'button button-primary';
+      payButton.textContent = 'Оплатити';
+      payButton.type = 'button';
+      payButton.addEventListener('click', () => renderRequisitesForm(bank, data));
+
+      const cancelButton = document.createElement('a');
+      cancelButton.className = 'button button-outline';
+      cancelButton.href = 'booking.html';
+      cancelButton.textContent = 'Повернутись';
+
+      actions.appendChild(payButton);
+      actions.appendChild(cancelButton);
+      paymentContent.appendChild(actions);
+    };
+
+    const renderRequisitesForm = (bank, data) => {
+      paymentContent.innerHTML = '';
+      const title = document.createElement('p');
+      title.className = 'payment-instructions';
+      title.textContent = 'Будь ласка, надайте повні дані картки перед переходом у банк.';
+      paymentContent.appendChild(title);
+
+      const form = document.createElement('form');
+      form.className = 'payment-requisites';
+      form.innerHTML = `
+        <label>ПІБ платника<span>*</span><input type="text" name="payerName" value="${data.name || ''}" required></label>
+        <label>Телефон<span>*</span><input type="tel" name="payerPhone" value="${data.phone || ''}" required></label>
+        <label>Email<span>*</span><input type="email" name="payerEmail" placeholder="example@mail.com" required></label>
+        <label>Номер картки<span>*</span><input type="text" name="cardNumber" value="4441 1110 3400 0749" required></label>
+        <label>Термін діі<span>*</span><input type="text" name="cardExpiry" placeholder="MM/YY" required></label>
+        <label>CVC / CVV<span>*</span><input type="text" name="cardCvc" placeholder="123" required></label>
+        <label>Коментар до платежу<span>*</span><textarea name="payerDetails" rows="3" placeholder="Наприклад, ПІБ та телефон для підтвердження" required></textarea></label>
+      `;
+      paymentContent.appendChild(form);
+
+      const actions = document.createElement('div');
+      actions.className = 'payment-actions';
+
+      const submitButton = document.createElement('button');
+      submitButton.className = 'button button-primary';
+      submitButton.type = 'button';
+      submitButton.textContent = 'Підтвердити реквізити і оплатити';
+      submitButton.addEventListener('click', () => handleRequisitesSubmit(bank, data, form));
+
+      const cancelButton = document.createElement('a');
+      cancelButton.className = 'button button-outline';
+      cancelButton.href = 'booking.html';
+      cancelButton.textContent = 'Повернутись';
+
+      actions.appendChild(submitButton);
+      actions.appendChild(cancelButton);
+      paymentContent.appendChild(actions);
+    };
+
+    const renderAwaitingBankReturn = bank => {
+      paymentContent.innerHTML = '';
+      const message = document.createElement('div');
+      message.className = 'payment-result';
+      message.innerHTML = `
+        <p>Ми відкрили додаток банку ${bank}. Підтвердіть платіж там, а потім поверніться на цю сторінку.</p>
+        <p>Сайт автоматично покаже підтвердження після повернення.</p>
+      `;
+      paymentContent.appendChild(message);
+    };
+
+    const renderBankConfirmStep = (bank, data) => {
+      paymentContent.innerHTML = '';
+      const title = document.createElement('p');
+      title.className = 'payment-instructions';
+      title.textContent = `Підтвердіть оплату в ${bank}, натиснувши кнопку нижче.`;
+      paymentContent.appendChild(title);
+
+      const summary = document.createElement('div');
+      summary.className = 'payment-summary';
+      summary.innerHTML = `
+        <p><strong>Ім'я:</strong> ${formatValue(data.payerName || data.name)}</p>
+        <p><strong>Послуга:</strong> ${formatValue(data.service)}</p>
+        <p><strong>Дата:</strong> ${formatValue(data.date)}</p>
+        <p><strong>Час:</strong> ${formatValue(data.time)}</p>
+        <p><strong>Картка:</strong> ${formatValue(data.cardNumber)}</p>
+      `;
+      paymentContent.appendChild(summary);
+
+      const note = document.createElement('p');
+      note.className = 'payment-note';
+      note.textContent = 'Після натискання ви перейдете до Monobank для підтвердження платежу.';
+      paymentContent.appendChild(note);
+
+      const actions = document.createElement('div');
+      actions.className = 'payment-actions';
+
+      const confirmButton = document.createElement('button');
+      confirmButton.className = 'button button-primary';
+      confirmButton.type = 'button';
+      confirmButton.textContent = 'Підтвердити оплату в Monobank';
+      confirmButton.addEventListener('click', () => {
+        localStorage.setItem(paymentInProgressKey, 'true');
+        params.set('progress', 'true');
+        window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
+        const bankUrl = bankLinks[bank] || 'https://www.google.com/search?q=' + encodeURIComponent(bank + ' банк');
+        window.location.href = bankUrl;
+      });
+
+      const cancelButton = document.createElement('a');
+      cancelButton.className = 'button button-outline';
+      cancelButton.href = 'booking.html';
+      cancelButton.textContent = 'Повернутись';
+
+      actions.appendChild(confirmButton);
+      actions.appendChild(cancelButton);
+      paymentContent.appendChild(actions);
+    };
+
+    const handlePaymentPay = (bank, data) => {
+      renderRequisitesForm(bank, data);
+    };
+
+    const handleRequisitesSubmit = (bank, data, form) => {
+      const formData = new FormData(form);
+      const payerName = formData.get('payerName');
+      const payerPhone = formData.get('payerPhone');
+      const payerEmail = formData.get('payerEmail');
+      const cardNumber = formData.get('cardNumber');
+      const cardExpiry = formData.get('cardExpiry');
+      const cardCvc = formData.get('cardCvc');
+      const payerDetails = formData.get('payerDetails');
+
+      if (!payerName || !payerPhone || !payerEmail || !cardNumber || !cardExpiry || !cardCvc || !payerDetails) {
+        alert('Будь ласка, заповніть усі реквізити перед переходом до банку.');
+        return;
+      }
+
+      const bookingData = {
+        ...data,
+        payerName,
+        payerPhone,
+        payerEmail,
+        cardNumber,
+        cardExpiry,
+        cardCvc,
+        payerDetails,
+        payment: 'card'
+      };
+
+      localStorage.setItem('humreyPendingBooking', JSON.stringify(bookingData));
+      params.set('bank', bank);
+      params.set('confirm', 'true');
+      window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
+      renderBankConfirmStep(bank, bookingData);
+    };
+
+    const renderPaymentComplete = (bank, data) => {
+      const status = document.createElement('div');
+      status.className = 'payment-result';
+      status.innerHTML = `
+        <p>Платіж підтверджено. Ваш запис на ${data.date} о ${data.time} успішно зафіксовано.</p>
+        <p>Підтвердження також надіслано на пошту.</p>
+        <a class="button button-primary" href="index.html">На головну</a>
+      `;
+      paymentContent.innerHTML = '';
+      paymentContent.appendChild(status);
+      const booked = JSON.parse(localStorage.getItem('humreyBookedSlots') || '[]');
+      if (!booked.includes(`${data.date}|${data.time}`)) {
+        booked.push(`${data.date}|${data.time}`);
+        localStorage.setItem('humreyBookedSlots', JSON.stringify(booked));
+      }
+      localStorage.removeItem(paymentInProgressKey);
+      localStorage.removeItem('humreyPendingBooking');
+    };
+
+    const bank = params.get('bank');
+    const progress = params.get('progress') === 'true';
+    const confirm = params.get('confirm') === 'true';
+    const data = pending || Object.fromEntries(params.entries());
+
+    const maybeCompleteOnReturn = () => {
+      const inProgress = localStorage.getItem(paymentInProgressKey) === 'true';
+      if (inProgress && progress && bank && data && data.date && data.time && data.service) {
+        renderPaymentComplete(bank, data);
+      }
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        maybeCompleteOnReturn();
+      }
+    });
+
+    window.addEventListener('focus', maybeCompleteOnReturn);
+
+    if (!params.get('date') || !params.get('time') || !params.get('service')) {
+      paymentContent.innerHTML = '<p class="payment-instructions">Немає даних бронювання. Поверніться на сторінку запису та заповніть форму.</p><a class="button button-primary" href="booking.html">Повернутись</a>';
+    } else if (!bank) {
+      renderBankList();
+    } else if (progress && localStorage.getItem(paymentInProgressKey) === 'true') {
+      renderAwaitingBankReturn(bank);
+    } else if (confirm) {
+      renderBankConfirmStep(bank, data);
+    } else {
+      renderPaymentDetails(bank);
+    }
+  </script>
+  <script src="auth.js?v=5"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HUMREY | Чоловічий манікюр та педикюр</title>
+  <meta name="description" content="HUMREY - преміальний чоловічий догляд: манікюр, педикюр, SPA та догляд за шкірою рук і стоп.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html#home">HUMREY</a>
+    <nav class="nav">
+      <a href="#about">Про салон</a>
+      <a href="#team">Команда</a>
+      <a href="#services">Послуги</a>
+      <a href="#gallery">Галерея</a>
+      <a href="#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="booking.html">Записатися</a>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="auto" poster="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1400&q=80" onerror="this.style.display='none';this.closest('.hero').classList.add('hero-video-fallback');">
+        <source src="https://cdn.coverr.co/videos/coverr-handsome-man-getting-manicure-4546/1080p.mp4" type="video/mp4">
+      </video>
+      <div class="hero-overlay"></div>
+      <div class="hero-scene" aria-hidden="true">
+        <span class="shape shape-1"></span>
+        <span class="shape shape-2"></span>
+        <span class="shape shape-3"></span>
+      </div>
+      <div class="hero-content">
+        <p class="eyebrow">Чоловічий догляд</p>
+        <h1>HUMREY - стильний манікюр і педикюр</h1>
+        <p class="hero-text">Преміальний салон для чоловіків, які цінують якість, чистоту та впевненість у кожній деталі.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="booking.html">Записатися</a>
+          <a class="button button-secondary" href="#services">Послуги</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section about" id="about">
+      <div class="section-header">
+        <span>Про салон</span>
+        <h2>Преміальний догляд для чоловіків</h2>
+      </div>
+      <div class="about-grid">
+        <p>HUMREY - це чоловічий салон краси, де манікюр та педикюр перетворюються на частину стилю та догляду. Ми дбаємо про чистоту, комфорт і точність на кожному етапі.</p>
+        <div class="about-cards">
+          <div class="info-card">
+            <h3>Чистота та професіоналізм</h3>
+            <p>Стерильні інструменти, дбайливий підхід і ретельність у кожній процедурі.</p>
+          </div>
+          <div class="info-card">
+            <h3>Комфорт і конфіденційність</h3>
+            <p>Стриманий інтер'єр, усамітнена атмосфера та обслуговування без зайвого шуму.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section team" id="team">
+      <div class="section-header">
+        <span>Команда</span>
+        <h2>Майстри чоловічого догляду</h2>
+        <p class="section-copy">Ольга та Марина працюють з чоловічими руками, щоб кожен запис був стильним, ретельним та швидким.</p>
+      </div>
+      <div class="team-grid">
+        <article class="team-card">
+          <div class="team-avatar">
+            <img src="olgamaster.png" alt="Ольга">
+          </div>
+          <h3>Ольга</h3>
+          <p>Майстер нігтьового сервісу / чоловічий манікюр</p>
+        </article>
+        <article class="team-card">
+          <div class="team-avatar">
+            <img src="MarinaMaster.png" alt="Марина">
+          </div>
+          <h3>Марина</h3>
+          <p>Майстер нігтьового сервісу / чоловічий педикюр</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section price-list" id="services">
+      <div class="section-header">
+        <span>Послуги</span>
+        <h2>Усі послуги з прайс-листа</h2>
+      </div>
+      <div class="price-card">
+        <div class="price-category">
+          <h3>Manicure + Pedicure</h3>
+          <div class="price-row">
+            <span>Parallel</span>
+            <strong>2000 UAH</strong>
+          </div>
+        </div>
+
+        <div class="price-category">
+          <h3>Manicure</h3>
+          <div class="price-row"><span>Манікюр Standard</span><strong>900 UAH</strong></div>
+          <div class="price-row"><span>Манікюр SPA</span><strong>1400 UAH</strong></div>
+          <div class="price-row"><span>SPA догляд для рук</span><strong>500 UAH</strong></div>
+          <div class="price-row"><span>Частковий манікюр</span><strong>500 UAH</strong></div>
+        </div>
+
+        <div class="price-category">
+          <h3>Pedicure</h3>
+          <div class="price-row"><span>Педикюр Standard</span><strong>1100 UAH</strong></div>
+          <div class="price-row"><span>Педикюр SPA</span><strong>1700 UAH</strong></div>
+          <div class="price-row"><span>SPA догляд для ніг</span><strong>600 UAH</strong></div>
+          <div class="price-row"><span>Частковий педикюр</span><strong>600 UAH</strong></div>
+          <div class="price-row"><span>Педикюр подологічний</span><strong>1550 UAH</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section advantages">
+      <div class="section-header">
+        <span>Переваги</span>
+        <h2>Чому обирають HUMREY</h2>
+      </div>
+      <div class="advantages-grid">
+        <div class="advantage-item">
+          <h3>Тільки для чоловіків</h3>
+          <p>Послуги та атмосфера створені саме для чоловічої естетики і стилю.</p>
+        </div>
+        <div class="advantage-item">
+          <h3>Преміальні матеріали</h3>
+          <p>Професійні засоби, якісні інструменти та увага до деталей.</p>
+        </div>
+        <div class="advantage-item">
+          <h3>Сучасний інтер'єр</h3>
+          <p>Чорні, графітові та металеві акценти для стриманого, мужнього стилю.</p>
+        </div>
+        <div class="advantage-item">
+          <h3>Конфіденційність</h3>
+          <p>Особистий простір, де клієнт почувається зручно і розслаблено.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section gallery" id="gallery">
+      <div class="section-header">
+        <span>Галерея</span>
+        <h2>Стильний манікюр у кожній деталі</h2>
+        <p class="section-copy">Доглянуті руки та акуратні нігті - це перше враження, яке говорить за вас.</p>
+      </div>
+      <div class="gallery-wrapper">
+        <button class="gallery-nav gallery-nav--prev" type="button" aria-label="Попередня фотографія">‹</button>
+        <div class="gallery-slider" aria-label="Слайдер фотографій">
+          <div class="gallery-item">
+            <img src="gallery-1.jpg" alt="Чоловічий манікюр">
+          </div>
+          <div class="gallery-item">
+            <img src="gallery-2.jpg" alt="Педикюр у салоні">
+          </div>
+          <div class="gallery-item">
+            <img src="gallery-3.webp" alt="Доглянуті руки">
+          </div>
+          <div class="gallery-item">
+            <img src="gallery-4.jpg" alt="Салонний сервіс">
+          </div>
+          <div class="gallery-item">
+            <img src="gallery-5.jpg" alt="Стильний догляд">
+          </div>
+        </div>
+        <button class="gallery-nav gallery-nav--next" type="button" aria-label="Наступна фотографія">›</button>
+      </div>
+    </section>
+
+    <section class="section testimonials">
+      <div class="section-header">
+        <span>Відгуки</span>
+        <h2>Лаконічно, чітко, без зайвого</h2>
+      </div>
+      <div class="testimonial-wrapper">
+        <button class="testimonial-nav testimonial-nav--prev" type="button" aria-label="Попередній відгук">‹</button>
+        <div class="testimonial-slider" aria-label="Слайдер відгуків">
+          <article class="testimonial-card">
+            <p>«Швидко, акуратно і без зайвого шуму. Тут точно знають, як доглядати чоловічі руки.»</p>
+            <span>- Олексій, керівник</span>
+          </article>
+          <article class="testimonial-card">
+            <p>«Професійний сервіс і стриманий інтер'єр. Відчувається справжня увага до деталей.»</p>
+            <span>- Денис, стиліст</span>
+          </article>
+          <article class="testimonial-card">
+            <p>«Все чітко: запис, процедура, результат. Руки виглядають ідеально.»</p>
+            <span>- Андрій, підприємець</span>
+          </article>
+        </div>
+        <button class="testimonial-nav testimonial-nav--next" type="button" aria-label="Наступний відгук">›</button>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="section-header">
+        <span>Часті запитання</span>
+        <h2>Відповіді на найпоширеніші питання</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Як записатися в «HUMREY»?</summary>
+          <div class="faq-content">
+            <p>Натисніть на кнопку «Записатися», оберіть зручний час і заповніть форму. Ми підтвердимо ваш запис протягом кількох хвилин.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Які послуги ви надаєте?</summary>
+          <div class="faq-content">
+            <p>Чоловічий манікюр, педикюр, SPA-догляд, лікувальні процедури для рук і стоп у стриманому інтер’єрі.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Чи потрібна попередня реєстрація?</summary>
+          <div class="faq-content">
+            <p>Так, ми працюємо за записом, щоб забезпечити комфорт і вчасне обслуговування кожного клієнта.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Які ціни на послуги?</summary>
+          <div class="faq-content">
+            <p>Ціни доступні у блоці «Послуги» на сайті. Якщо потрібна допомога з вибором — напишіть або зателефонуйте.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Чи приймаються кредитні картки?</summary>
+          <div class="faq-content">
+            <p>Так, ми приймаємо всі популярні кредитні та дебетові картки, а також безготівкові платежі.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Чи є подарункові сертифікати?</summary>
+          <div class="faq-content">
+            <p>Так, ми пропонуємо подарункові сертифікати на будь-які послуги — ідеально для подарунка близькій людині.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="section contact" id="contact">
+      <div class="section-header">
+        <span>Контакти</span>
+        <h2>Запишіться на сеанс чоловічого догляду</h2>
+      </div>
+      <div class="contact-grid contact-grid--map">
+        <div class="contact-stack">
+          <div class="contact-card">
+            <p class="contact-label">Адреса</p>
+            <p>вулиця Професора Підвисоцького, 3А, Київ, Україна</p>
+          </div>
+          <div class="contact-card">
+            <p class="contact-label">Телефон</p>
+            <p><a href="tel:+380970870000">+380 97 087 0000</a></p>
+          </div>
+          <div class="contact-card">
+            <p class="contact-label">Viber</p>
+            <p><a class="contact-link contact-link--viber" href="viber://contact?number=%2B380970870000">📱 Написати в Viber</a></p>
+          </div>
+          <div class="contact-card">
+            <p class="contact-label">WhatsApp</p>
+            <p><a class="contact-link contact-link--whatsapp" href="https://api.whatsapp.com/send/?phone=%2B380970870000" target="_blank" rel="noopener noreferrer">💬 Написати в WhatsApp</a></p>
+          </div>
+          <div class="contact-card">
+            <p class="contact-label">Графік</p>
+            <p>Пн-Сб: 10:00-21:00</p>
+          </div>
+        </div>
+        <div class="contact-card contact-card--map">
+          <iframe
+            class="contact-map"
+            src="https://maps.google.com/maps?width=100%25&height=600&q=%D0%B2%D1%83%D0%BB%D0%B8%D1%86%D1%8F%20%D0%9F%D1%80%D0%BE%D1%84%D0%B5%D1%81%D0%BE%D1%80%D0%B0%20%D0%9F%D1%96%D0%B4%D0%B2%D0%B8%D1%81%D0%BE%D1%86%D1%8C%D0%BA%D0%BE%D0%B3%D0%BE%2C%203%D0%90%2C%20Kyiv%2C%20Ukraine&ie=UTF8&t=&z=17&iwloc=B&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            aria-label="Карта місцезнаходження HUMREY"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>HUMREY - чоловічий манікюр та педикюр</span>
+    <span>© 2026</span>
+  </footer>
+  <script src="auth.js?v=5" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const heroVideo = document.getElementById('heroVideo');
+      if (!heroVideo) return;
+      heroVideo.muted = true;
+      const tryPlay = () => {
+        const playPromise = heroVideo.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.catch(() => {
+            heroVideo.muted = true;
+            heroVideo.play().catch(() => {
+              heroVideo.style.display = 'none';
+              heroVideo.closest('.hero')?.classList.add('hero-video-fallback');
+            });
+          });
+        }
+      };
+      tryPlay();
+      window.addEventListener('focus', tryPlay);
+
+      const testimonialSlider = document.querySelector('.testimonial-slider');
+      const prevButton = document.querySelector('.testimonial-nav--prev');
+      const nextButton = document.querySelector('.testimonial-nav--next');
+      const gallerySlider = document.querySelector('.gallery-slider');
+      const galleryPrev = document.querySelector('.gallery-nav--prev');
+      const galleryNext = document.querySelector('.gallery-nav--next');
+
+      if (testimonialSlider && prevButton && nextButton) {
+        const cardWidth = () => testimonialSlider.querySelector('.testimonial-card')?.offsetWidth || 0;
+        prevButton.addEventListener('click', () => {
+          testimonialSlider.scrollBy({ left: -(cardWidth() + 16), behavior: 'smooth' });
+        });
+        nextButton.addEventListener('click', () => {
+          testimonialSlider.scrollBy({ left: cardWidth() + 16, behavior: 'smooth' });
+        });
+      }
+
+      if (gallerySlider && galleryPrev && galleryNext) {
+        const galleryCardWidth = () => gallerySlider.querySelector('.gallery-item')?.offsetWidth || 0;
+        galleryPrev.addEventListener('click', () => {
+          gallerySlider.scrollBy({ left: -(galleryCardWidth() + 16), behavior: 'smooth' });
+        });
+        galleryNext.addEventListener('click', () => {
+          gallerySlider.scrollBy({ left: galleryCardWidth() + 16, behavior: 'smooth' });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+
+

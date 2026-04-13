@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Підтвердіть платіж | Monobank</title>
+  <meta name="description" content="Підтвердження платежу Monobank для HUMREY.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Monobank</div>
+    <nav class="nav">
+      <a href="index.html#services">Послуги</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="card-example.html">Повернутись</a>
+  </header>
+  <main class="card-example-page">
+    <section class="card-example-hero">
+      <div class="card-example-panel">
+        <div class="card-example-header">
+          <span>Monobank</span>
+          <h1>Підтвердіть платіж</h1>
+          <p>На ваш пристрій має надійти повідомлення від Monobank. Підтвердіть платіж у додатку.</p>
+        </div>
+        <div class="card-example-box">
+          <div class="bank-confirm-card">
+            <div class="bank-logos">
+              <div class="bank-logo">monobank</div>
+            </div>
+            <div class="bank-confirm-info">
+              <div>
+                <span>ТОРГОВЕЛЬНА ТОЧКА</span>
+                <strong>HUMREY</strong>
+              </div>
+              <div>
+                <span>СУМА</span>
+                <strong id="pendingAmount">0 UAH</strong>
+              </div>
+            </div>
+            <div class="bank-confirm-meta">
+              <div><span>Дата</span><strong id="pendingDate"></strong></div>
+              <div><span>Послуга</span><strong id="pendingService"></strong></div>
+            </div>
+            <div class="bank-confirm-note" id="bankNote">На мобільному пристрої натисніть кнопку нижче, щоб відкрити Monobank. В додатку вручну виконайте переказ на суму, вказану в цій заявці.</div>
+            <div class="bank-actions">
+              <button class="button button-primary bank-confirm-button" id="openBankButton">Відкрити Monobank</button>
+              <button class="button button-outline" id="manualConfirmButton">Я оплатив вручну</button>
+            </div>
+            <div class="bank-manual-note" id="manualNote">Якщо Monobank не відкрився автоматично, відкрийте додаток вручну і зробіть переказ.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="confirm-overlay hidden" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <div class="confirm-dialog-icon">✓</div>
+      <h2>Платіж підтверджено</h2>
+      <p>Отримано підтвердження від Monobank. Зараз ми переадресуємо вас на екран завершення.</p>
+    </div>
+  </div>
+  <footer class="footer">
+    <span>HUMREY - чоловічий манікюр і педикюр</span>
+    <span>© 2026</span>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentId = new URLSearchParams(window.location.search).get('paymentId');
+      const pendingAmount = document.getElementById('pendingAmount');
+      const pendingService = document.getElementById('pendingService');
+      const pendingDate = document.getElementById('pendingDate');
+      const bankNote = document.getElementById('bankNote');
+      const apiBase = 'http://localhost:3001/api/payments';
+      let pollingInterval = null;
+
+      const openBankButton = document.getElementById('openBankButton');
+      const manualConfirmButton = document.getElementById('manualConfirmButton');
+
+      const parseAmountValue = () => {
+        const raw = pendingAmount.textContent || '0';
+        return Number(raw.replace(/[^\d]/g, '')) || 0;
+      };
+
+      const setError = message => {
+        pendingAmount.textContent = '0 UAH';
+        pendingService.textContent = 'Немає даних';
+        pendingDate.textContent = '-';
+        bankNote.textContent = message;
+        if (openBankButton) openBankButton.disabled = true;
+        if (manualConfirmButton) manualConfirmButton.disabled = true;
+      };
+
+      if (!paymentId) {
+        setError('Невалідний ідентифікатор платежу. Поверніться до оплати.');
+        return;
+      }
+
+      const refreshStatus = async () => {
+        try {
+          const response = await fetch(`${apiBase}/status?paymentId=${encodeURIComponent(paymentId)}`);
+          if (!response.ok) {
+            setError('Не вдалося перевірити статус платежу. Спробуйте оновити сторінку.');
+            return;
+          }
+          const result = await response.json();
+          pendingAmount.textContent = result.booking.amount || '0 UAH';
+          pendingService.textContent = result.booking.service || 'Послуга';
+          pendingDate.textContent = result.booking.date || '-';
+
+          if (result.status === 'paid') {
+            clearInterval(pollingInterval);
+            window.location.href = `payment-success.html?paymentId=${encodeURIComponent(paymentId)}`;
+            return;
+          }
+
+          bankNote.textContent = 'Очікуйте підтвердження платежу у Monobank. Статус платежу: ' + result.status + '.';
+        } catch (error) {
+          setError('Помилка зв’язку з сервером. Перевірте підключення.');
+        }
+      };
+
+      const confirmOverlay = document.getElementById('confirmOverlay');
+      const manualNote = document.getElementById('manualNote');
+
+      const openMonobank = () => {
+        const amountNum = parseAmountValue();
+        const description = encodeURIComponent(`Оплата HUMREY ${pendingService.textContent}`);
+        const monobankLink = `https://send.monobank.ua/?amount=${amountNum}&description=${description}`;
+        window.location.href = monobankLink;
+      };
+
+      openBankButton.addEventListener('click', () => {
+        if (!openBankButton.disabled) {
+          openMonobank();
+        }
+      });
+
+      manualConfirmButton.addEventListener('click', async () => {
+        try {
+          const response = await fetch(`${apiBase}/confirm`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+          });
+          if (!response.ok) {
+            const result = await response.json();
+            setError(result.error || 'Не вдалося підтвердити платіж.');
+            return;
+          }
+          confirmOverlay.classList.remove('hidden');
+          bankNote.textContent = 'Платіж підтверджено. іачекайте, ми перенаправимо вас...';
+          setTimeout(() => {
+            window.location.href = `payment-success.html?paymentId=${encodeURIComponent(paymentId)}`;
+          }, 1400);
+        } catch (error) {
+          setError('Помилка зв’язку з сервером. Спробуйте ще раз.');
+        }
+      });
+
+      refreshStatus();
+      pollingInterval = setInterval(refreshStatus, 3000);
+    });
+  </script>
+  <script src="auth.js?v=5"></script>
+</body>
+</html>
+
+
+

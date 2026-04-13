@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Онлайн запис | HUMREY</title>
+  <meta name="description" content="Онлайн запис на преміальний чоловічий манікюр та педикюр у HUMREY.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html#home">HUMREY</a>
+    <nav class="nav">
+      <a href="index.html#about">Про салон</a>
+      <a href="index.html#services">Послуги</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="index.html">Головна</a>
+  </header>
+
+  <main class="booking-page">
+    <section class="section booking-intro">
+      <div class="section-header">
+        <span>Онлайн запис</span>
+        <h2>Замовити догляд у стилі HUMREY</h2>
+      </div>
+      <p>Оберіть зручну дату та час, і ми підтвердимо бронювання протягом 15 хвилин. Простий сервіс для вашого стилю і графіка.</p>
+    </section>
+
+    <form class="booking-form" id="bookingForm" action="https://formsubmit.co/588e67f33e83c774d53f42d841258e26" method="POST">
+      <input type="hidden" name="_subject" value="Нова заявка HUMREY">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_autoresponse" value="Дякуємо, ми підтвердимо вашу бронь найближчим часом.">
+      <input type="hidden" name="_captcha" value="false">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Ім'я</label>
+          <input class="form-control" type="text" id="name" name="name" placeholder="Ваше ім'я" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Телефон</label>
+          <input class="form-control" type="tel" id="phone" name="phone" placeholder="+380 99 123 45 67" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="service">Послуга</label>
+          <select class="form-control" id="service" name="service" required>
+            <option value="">Оберіть послугу</option>
+            <option>Parallel (Manicure + Pedicure)</option>
+            <option>Манікюр Standard</option>
+            <option>Манікюр SPA</option>
+            <option>SPA догляд для рук</option>
+            <option>Частковий манікюр</option>
+            <option>Педикюр Standard</option>
+            <option>Педикюр SPA</option>
+            <option>SPA догляд для ніг</option>
+            <option>Частковий педикюр</option>
+            <option>Педикюр подологічний</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="payment">Оплата</label>
+          <select class="form-control" id="payment" name="payment" required>
+            <option value="">Оберіть спосіб</option>
+            <option value="cash">Готівка</option>
+            <option value="card">Карткою</option>
+          </select>
+        </div>
+        <div class="date-time-group">
+          <div class="form-group">
+            <label for="date">Дата</label>
+            <input class="form-control" type="date" id="date" name="date" required>
+          </div>
+          <div class="form-group">
+            <label for="time">Час</label>
+            <select class="form-control" id="time" name="time" required>
+              <option value="">Оберіть час</option>
+            </select>
+            <div class="slot-note" id="slotNote">Обирайте дату, щоб побачити вільні слоти.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Коментар</label>
+        <textarea class="form-control" id="notes" name="notes" placeholder="Додаткові побажання або питання"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="button button-primary" type="submit">Надіслати запит</button>
+        <span class="form-notice" id="formNotice"></span>
+      </div>
+    </form>
+  </main>
+
+  <footer class="footer">
+    <span>HUMREY - чоловічий манікюр та педикюр</span>
+    <span>© 2026</span>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('bookingForm');
+      const notice = document.getElementById('formNotice');
+      const dateInput = document.getElementById('date');
+      const timeSelect = document.getElementById('time');
+      const slotNote = document.getElementById('slotNote');
+      const submitButton = form.querySelector('button[type="submit"]');
+      const availableTimes = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+      const servicePrices = {
+        'Parallel (Manicure + Pedicure)': '2000 UAH',
+        'Манікюр Standard': '900 UAH',
+        'Манікюр SPA': '1400 UAH',
+        'SPA догляд для рук': '500 UAH',
+        'Частковий манікюр': '500 UAH',
+        'Педикюр Standard': '1100 UAH',
+        'Педикюр SPA': '1700 UAH',
+        'SPA догляд для ніг': '600 UAH',
+        'Частковий педикюр': '600 UAH',
+        'Педикюр подологічний': '1550 UAH'
+      };
+      const apiBase = '/api/payments';
+      const storageKey = 'humreyBookedSlots';
+
+      const getBookedSlots = () => {
+        const stored = localStorage.getItem(storageKey);
+        return stored ? JSON.parse(stored) : [];
+      };
+
+      const saveBookedSlot = slot => {
+        const slots = getBookedSlots();
+        slots.push(slot);
+        localStorage.setItem(storageKey, JSON.stringify(slots));
+      };
+
+      const getAvailableTimesForDate = date => {
+        if (!date) return availableTimes;
+        const booked = getBookedSlots();
+        return availableTimes.filter(time => !booked.includes(`${date}|${time}`));
+      };
+
+      const updateTimeOptions = () => {
+        const date = dateInput.value;
+        timeSelect.innerHTML = '<option value="">Оберіть час</option>';
+        const available = getAvailableTimesForDate(date);
+
+        if (!date) {
+          slotNote.textContent = 'Обирайте дату, щоб побачити вільні слоти.';
+          timeSelect.disabled = true;
+          return;
+        }
+
+        timeSelect.disabled = false;
+        if (available.length === 0) {
+          slotNote.textContent = 'На цю дату всі слоти зайняті. Оберіть інший день.';
+          timeSelect.disabled = true;
+        } else {
+          slotNote.textContent = 'Доступні години: ' + available.join(', ') + '.';
+          available.forEach(time => {
+            const option = document.createElement('option');
+            option.value = time;
+            option.textContent = time;
+            timeSelect.appendChild(option);
+          });
+        }
+      };
+
+      if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+      }
+
+      dateInput.addEventListener('input', updateTimeOptions);
+      dateInput.addEventListener('change', updateTimeOptions);
+      updateTimeOptions();
+
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const name = formData.get('name') || 'Гість';
+        const service = formData.get('service') || 'Не вказано';
+        const paymentType = formData.get('payment');
+        const date = formData.get('date');
+        const time = formData.get('time');
+        const phone = formData.get('phone') || 'Не вказано';
+        const amount = servicePrices[service] || '250.00 UAH';
+
+        if (!date || !time || !paymentType) {
+          notice.textContent = 'Будь ласка, оберіть дату, час та спосіб оплати.';
+          notice.classList.remove('success');
+          notice.style.opacity = '1';
+          return;
+        }
+
+        if (!getAvailableTimesForDate(date).includes(time)) {
+          notice.textContent = 'Цей час вже зайнятий. Будь ласка, оберіть інший слот.';
+          notice.classList.remove('success');
+          notice.style.opacity = '1';
+          updateTimeOptions();
+          return;
+        }
+
+        if (paymentType === 'card') {
+          localStorage.setItem('humreyPendingBooking', JSON.stringify({ name, service, date, time, phone, payment: 'card', amount }));
+          const params = new URLSearchParams({ name, service, date, time, phone, payment: 'card', amount });
+          window.location.href = 'card-example.html?' + params.toString();
+          return;
+        }
+
+        notice.textContent = 'Надсилаємо запис на ' + date + ' о ' + time + '. Почекайте...';
+        notice.classList.add('success');
+        notice.style.opacity = '1';
+        submitButton.disabled = true;
+        submitButton.textContent = 'Надсилаємо...';
+
+        const bookingPayload = {
+          booking: { name, service, date, time, phone, payment: 'cash', amount }
+        };
+
+        const serverResponse = await fetch(`${apiBase}/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bookingPayload)
+        });
+
+        const serverResult = await serverResponse.json();
+        if (!serverResponse.ok) {
+          notice.textContent = serverResult.error || 'Не вдалося зберегти бронювання на сервері.';
+          notice.classList.remove('success');
+          submitButton.disabled = false;
+          submitButton.textContent = 'Надіслати запит';
+          return;
+        }
+
+        saveBookedSlot(`${date}|${time}`);
+        updateTimeOptions();
+
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+          notice.textContent = data.success === 'true' || data.success === true
+            ? 'Ваш запис прийнято. Підтвердження буде надіслано на пошту.'
+            : 'Форма надіслана, але виникла помилка з email. Спробуйте пізніше.';
+          if (data.success !== 'true' && data.success !== true) notice.classList.remove('success');
+          submitButton.textContent = 'Надіслати запит';
+          submitButton.disabled = false;
+        })
+        .catch(() => {
+          notice.textContent = 'Ваш запис прийнято, але email не вдалося надіслати. Спробуйте пізніше.';
+          notice.classList.remove('success');
+          submitButton.textContent = 'Надіслати запит';
+          submitButton.disabled = false;
+        });
+
+        form.reset();
+        updateTimeOptions();
+      });
+    });
+  </script>
+  <script src="auth.js?v=5"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Платіж підтверджено | HUMREY</title>
+  <meta name="description" content="Підтвердження успішного платежу HUMREY.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html#home">HUMREY</a>
+    <nav class="nav">
+      <a href="index.html#about">Про салон</a>
+      <a href="index.html#services">Послуги</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="index.html">Головна</a>
+  </header>
+  <main class="card-example-page">
+    <section class="card-example-hero">
+      <div class="card-example-panel">
+        <div class="card-example-header">
+          <span>Платіж підтверджено</span>
+          <h1>Дякуємо!</h1>
+          <p>Ваш платіж підтверджено. Тепер запис активовано.</p>
+        </div>
+        <div class="card-example-box">
+          <div class="bank-confirm-card">
+            <div class="bank-logos">
+              <div class="bank-logo">monobank</div>
+            </div>
+            <div class="bank-confirm-info">
+              <div>
+                <span>ТОРГОВЕЛЬНА ТОЧКА</span>
+                <strong>HUMREY</strong>
+              </div>
+              <div>
+                <span>СУМА</span>
+                <strong id="successAmount">0 UAH</strong>
+              </div>
+            </div>
+            <div class="bank-confirm-meta">
+              <div><span>Дата</span><strong id="successDate"></strong></div>
+              <div><span>Послуга</span><strong id="successService"></strong></div>
+            </div>
+            <div class="bank-confirm-note" id="successNote">Ваш запис підтверджено. Дякуємо за оплату!</div>
+          </div>
+          <div class="card-footer">
+            <a class="button button-primary" href="index.html">Повернутись на головну</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <span>HUMREY - чоловічий манікюр і педикюр</span>
+    <span>© 2026</span>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentId = new URLSearchParams(window.location.search).get('paymentId');
+      const successAmount = document.getElementById('successAmount');
+      const successService = document.getElementById('successService');
+      const successDate = document.getElementById('successDate');
+      const successNote = document.getElementById('successNote');
+      const apiBase = 'http://localhost:3001/api/payments';
+
+      const setPending = message => {
+        successNote.textContent = message;
+        successAmount.textContent = '0 UAH';
+        successService.textContent = 'Немає даних';
+        successDate.textContent = '-';
+      };
+
+      if (!paymentId) {
+        setPending('Невалідний ідентифікатор платежу. Поверніться на сторінку оплати.');
+        return;
+      }
+
+      fetch(`${apiBase}/status?paymentId=${encodeURIComponent(paymentId)}`)
+        .then(response => response.json())
+        .then(result => {
+          if (result.status !== 'paid') {
+            setPending('Платіж ще не підтверджено. Сторінка очікує реального підтвердження.');
+            return;
+          }
+          successAmount.textContent = result.booking.amount || '0 UAH';
+          successService.textContent = result.booking.service || 'Послуга';
+          successDate.textContent = result.booking.date || '-';
+          successNote.textContent = 'Ваш запис підтверджено. Дякуємо за оплату!';
+        })
+        .catch(() => {
+          setPending('Не вдалося перевірити статус платежу. Спробуйте пізніше.');
+        });
+    });
+  </script>
+  <script src="auth.js?v=5"></script>
+</body>
+</html>
+
+

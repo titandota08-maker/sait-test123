@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "username": "Valera_OwnerSite1111",
+      "passwordHash": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "email": "zatulijvalera@gmail.com",
+      "isAdmin": true,
+      "verified": true,
+      "createdAt": 1776021884754
+    }
+  ],
+  "payments": [
+    {
+      "id": "c06ceada-7843-441b-b263-f8b64aa89a5d",
+      "status": "pending",
+      "method": "cash",
+      "booking": {
+        "name": "Валера",
+        "service": "Педикюр SPA",
+        "date": "2026-04-26",
+        "time": "10:30",
+        "phone": "+380963754345",
+        "payment": "cash",
+        "amount": "1700 UAH"
+      },
+      "card": null,
+      "saveCard": false,
+      "createdAt": 1776021917707
+    }
+  ]
+}

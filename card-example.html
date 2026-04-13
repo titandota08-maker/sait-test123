@@ -1,0 +1,274 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Приклад оплати карткою | HUMREY</title>
+  <meta name="description" content="Приклад сторінки оплати карткою HUMREY з полями номер картки, термін діі та CVC.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html#home">HUMREY</a>
+    <nav class="nav">
+      <a href="index.html#about">Про салон</a>
+      <a href="index.html#services">Послуги</a>
+      <a href="index.html#gallery">Галерея</a>
+      <a href="index.html#contact">Контакти</a>
+    </nav>
+    <a class="button button-outline" href="index.html">Головна</a>
+  </header>
+  <main class="card-example-page">
+    <section class="card-example-hero">
+      <div class="card-example-panel">
+        <div class="card-example-header">
+          <span>Безпечна оплата</span>
+          <h1>Оплатити карту</h1>
+          <p>Заповніть дані картки, підтвердіть платіж у банку і завершіть бронювання.</p>
+        </div>
+        <div class="card-example-box">
+          <div class="card-price">
+            <span>-</span>
+          </div>
+          <p class="card-subtitle" id="cardServiceLabel">Поповнення балансу</p>
+          <div class="card-frame" id="cardFormPanel">
+            <div class="card-field card-number">
+              <label>Номер картки</label>
+              <input type="text" name="cardNumber" placeholder="4444 4444 4444 4444" required>
+            </div>
+            <div class="card-row">
+              <div class="card-field card-expiry">
+                <label>Термін діі</label>
+                <input type="text" name="cardExpiry" placeholder="MM/YY" required>
+              </div>
+              <div class="card-field card-cvc">
+                <label>CVC</label>
+                <input type="text" name="cardCvc" placeholder="123" required>
+              </div>
+            </div>
+            <div class="card-field card-holder">
+              <label>Ім'я та прізвище на карті</label>
+              <input type="text" name="cardHolder" placeholder="Іван Іваненко" required>
+            </div>
+            <div class="card-error" id="cardError"></div>
+          </div>
+          <div class="card-footer" id="cardFormFooter">
+            <div class="card-save" id="cardSaveToggle" role="button" tabindex="0" aria-pressed="false">
+              <span class="toggle"></span>
+              <span id="cardSaveText">Зберегти дані картки для наступної оплати</span>
+            </div>
+            <button class="button button-primary card-pay-button">Оплатити</button>
+          </div>
+          <div class="card-confirm-panel hidden" id="cardConfirmPanel">
+            <div class="bank-confirm-card">
+              <div class="bank-logos">
+                <div class="bank-logo">monobank</div>
+                <div class="bank-logo visa">VISA</div>
+              </div>
+              <div class="bank-confirm-note">Для підтвердження платежу відкрийте застосунок Monobank на своєму смартфоні.</div>
+              <div class="bank-confirm-info">
+                <div>
+                  <span>ТОРГОВЕЛЬНА ТОЧКА</span>
+                  <strong>HUMREY</strong>
+                </div>
+                <div>
+                  <span>СУМА</span>
+                  <strong id="confirmAmount">0 UAH</strong>
+                </div>
+              </div>
+              <div class="bank-confirm-meta">
+                <div><span>Дата</span><strong id="confirmDate"></strong></div>
+                <div><span>Номер картки</span><strong id="confirmCardMask"></strong></div>
+              </div>
+              <button class="button button-primary bank-confirm-button">Відкрити Monobank</button>
+            </div>
+          </div>
+          <p class="card-trust">Безпечна оплата забезпечується <a href="https://overpay.ua" target="_blank" rel="noopener">Overpay</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <span>HUMREY - чоловічий манікюр і педикюр</span>
+    <span>© 2026</span>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const payButton = document.querySelector('.card-pay-button');
+      const priceLabel = document.querySelector('.card-price span');
+      const serviceLabel = document.getElementById('cardServiceLabel');
+      const storedBookingRaw = localStorage.getItem('humreyPendingBooking');
+      const storedBooking = storedBookingRaw ? JSON.parse(storedBookingRaw) : null;
+      const service = params.get('service') || (storedBooking ? storedBooking.service : '') || '';
+      const date = params.get('date') || (storedBooking ? storedBooking.date : '') || '';
+      const time = params.get('time') || (storedBooking ? storedBooking.time : '') || '';
+      const phone = params.get('phone') || (storedBooking ? storedBooking.phone : '') || '';
+      const apiBase = 'http://localhost:3001/api/payments';
+      const servicePrices = {
+        'Parallel (Manicure + Pedicure)': '2000 UAH',
+        'Манікюр Standard': '900 UAH',
+        'Манікюр SPA': '1400 UAH',
+        'SPA догляд для рук': '500 UAH',
+        'Частковий манікюр': '500 UAH',
+        'Педикюр Standard': '1100 UAH',
+        'Педикюр SPA': '1700 UAH',
+        'SPA догляд для ніг': '600 UAH',
+        'Частковий педикюр': '600 UAH',
+        'Педикюр подологічний': '1550 UAH'
+      };
+      let amount = params.get('amount') || (storedBooking ? storedBooking.amount : '') || '';
+      if (!amount && service) {
+        amount = servicePrices[service] || '';
+      }
+      if (!amount) {
+        amount = '250.00 UAH';
+      }
+
+      if (priceLabel) priceLabel.textContent = amount;
+      if (serviceLabel) serviceLabel.textContent = service || 'Поповнення балансу';
+      if (payButton) payButton.textContent = 'Оплатити ' + amount;
+
+      const cardFormPanel = document.getElementById('cardFormPanel');
+      const cardFormFooter = document.getElementById('cardFormFooter');
+      const cardSaveToggle = document.getElementById('cardSaveToggle');
+      const cardSaveText = document.getElementById('cardSaveText');
+      const cardError = document.getElementById('cardError');
+
+      const formatMask = value => {
+        const digits = value.replace(/\D/g, '');
+        return digits.length >= 4 ? '**** **** **** ' + digits.slice(-4) : value;
+      };
+
+      const validateCard = (number, expiry, cvc, holder) => {
+        const digits = number.replace(/\D/g, '');
+        if (digits.length !== 16 || !/^\d{16}$/.test(digits)) return 'Введіть правильний 16-значний номер картки.';
+        if (!luhnCheck(digits)) return 'Номер картки не пройшов перевірку. Перевірте значення.';
+        if (!/^\d{2}\/\d{2}$/.test(expiry)) return 'Термін діі має бути у форматі MM/YY.';
+        const [mm, yy] = expiry.split('/').map(Number);
+        if (mm < 1 || mm > 12) return 'Вкажіть коректний місяць терміну діі.';
+        const current = new Date();
+        const expiryDate = new Date(2000 + yy, mm - 1, 1);
+        if (expiryDate < new Date(current.getFullYear(), current.getMonth(), 1)) return 'Картка закінчилася. Вкажіть дійсний термін.';
+        if (!/^\d{3}$/.test(cvc)) return 'CVC має містити 3 цифри.';
+        if (!holder.trim()) return 'Вкажіть ім’я власника картки.';
+        return '';
+      };
+
+      const luhnCheck = digits => {
+        let sum = 0;
+        for (let i = 0; i < digits.length; i++) {
+          let intVal = parseInt(digits.charAt(digits.length - 1 - i), 10);
+          if (i % 2 === 1) {
+            intVal *= 2;
+            if (intVal > 9) intVal -= 9;
+          }
+          sum += intVal;
+        }
+        return sum % 10 === 0;
+      };
+
+      const cardNumberInput = document.querySelector('input[name="cardNumber"]');
+      const cardExpiryInput = document.querySelector('input[name="cardExpiry"]');
+      const cardCvcInput = document.querySelector('input[name="cardCvc"]');
+      const cardHolderInput = document.querySelector('input[name="cardHolder"]');
+      const savedCardRaw = localStorage.getItem('humreySavedCard');
+      const savedCard = savedCardRaw ? JSON.parse(savedCardRaw) : null;
+      let saveCardActive = false;
+
+      const updateSaveToggle = active => {
+        saveCardActive = active;
+        cardSaveToggle.classList.toggle('active', active);
+        cardSaveToggle.setAttribute('aria-pressed', active.toString());
+        cardSaveText.textContent = active ? 'Картка буде збережена для наступної оплати' : 'Зберегти дані картки для наступної оплати';
+      };
+
+      if (savedCard) {
+        cardNumberInput.value = savedCard.cardNumber || '';
+        cardExpiryInput.value = savedCard.cardExpiry || '';
+        cardCvcInput.value = savedCard.cardCvc || '';
+        cardHolderInput.value = savedCard.cardHolder || '';
+        updateSaveToggle(true);
+      }
+
+      const toggleCardSave = () => {
+        updateSaveToggle(!saveCardActive);
+      };
+
+      cardSaveToggle.addEventListener('click', toggleCardSave);
+      cardSaveToggle.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleCardSave();
+        }
+      });
+
+      const createPayment = async () => {
+        const cardNumber = cardNumberInput.value.trim();
+        const cardExpiry = cardExpiryInput.value.trim();
+        const cardCvc = cardCvcInput.value.trim();
+        const cardHolder = cardHolderInput.value.trim();
+
+        const error = validateCard(cardNumber, cardExpiry, cardCvc, cardHolder);
+        if (error) {
+          cardError.textContent = error;
+          cardError.classList.add('visible');
+          return;
+        }
+        cardError.textContent = '';
+        cardError.classList.remove('visible');
+
+        const booking = {
+          name: params.get('name') || '',
+          service,
+          date,
+          time,
+          phone,
+          payment: 'card',
+          amount
+        };
+
+        const payload = {
+          booking,
+          card: {
+            cardNumber,
+            cardExpiry,
+            cardCvc,
+            cardHolder
+          },
+          saveCard: saveCardActive
+        };
+
+        try {
+          const response = await fetch(`${apiBase}/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            cardError.textContent = result.error || 'Помилка створення платежу. Спробуйте пізніше.';
+            cardError.classList.add('visible');
+            return;
+          }
+
+          window.location.href = result.redirectUrl;
+        } catch (fetchError) {
+          cardError.textContent = 'Не вдалося зв’язатися з сервером. Перевірте підключення.';
+          cardError.classList.add('visible');
+        }
+      };
+
+      payButton.addEventListener('click', createPayment);
+    });
+  </script>
+  <script src="auth.js?v=5"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,16 @@
+{
+  "name": "humrey-payment-server",
+  "version": "1.0.0",
+  "description": "Server for HUMREY payment flow with real payment confirmation logic.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nodemailer": "^6.10.1",
+    "twilio": "^4.18.0"
+  }
+}
